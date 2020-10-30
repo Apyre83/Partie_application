@@ -1,5 +1,5 @@
 #coding:utf-8
-import tkinter as tk, pygame, sys, sqlite3
+import tkinter, pygame, sys, sqlite3
 
 #Débuter le programme
 pygame.init()
@@ -14,7 +14,7 @@ couleurBordure = pygame.Color("orange")
 premierPlan = pygame.Color("white")
 arrierePlan = pygame.Color("black")
 
-#Les images
+#Chargement des images
 imageFond = pygame.image.load("Fond.jpg")
 imageMenuPrincipal = pygame.transform.scale(pygame.image.load("cahier.jpg"), (longueur, largeur))
 image_supprimer = pygame.transform.scale(pygame.image.load("image_supprimer.png"), (30, 30))
@@ -54,7 +54,7 @@ texte = police.render("Coucou ! J'éspère que tu as passé u"
                       pygame.Color("#3B2A27"))
 screen.blit(texte, (50, 150))
 '''
-
+                    #Chaque ligne du cahier de text est séparée par une ordonnée y de 54 environ
 def afficher_devoirs():
 
     x = 100
@@ -84,21 +84,65 @@ def afficher_devoirs():
         y += 54
 
 
-
-
-
-
-
     #Fermer
     connexion.close()
-
 
 def ajouter_devoirs():
     pass
 
 def supprimer_devoirs():
-    pass
 
+    def confirmer_suppression():
+        a_supprimer = (i[0],)
+        #On supprimer le devoirs correspond à la ligne choisie
+        requete.execute("DELETE FROM les_notes WHERE id_devoirs = ?", a_supprimer)
+        connexion.commit()
+
+        #On ferme la fenetre tkinter
+        fenetre_tkinter.destroy()
+        afficher_devoirs()
+
+
+    def annuler_suppression():
+        fenetre_tkinter.destroy()
+    #On récupère la position de la souris
+    position_souris = pygame.mouse.get_pos()
+    position_souris_x = position_souris[0]
+    position_souris_y = position_souris[1]
+
+    #Cooordonées du premier bouton "Supprimer" (ENVIRON ce n'est pas exact)
+    xMin = 878
+    xMax = 900
+    yMin = 110
+    yMax = 134
+    '''
+    On creer la fenêtre tkinter afin de savoir si on veut bien supprimer le devoirs ou annuler sa suppression ||                               A CHANGER PAR UNE BELLE FENETRE :)
+    Au passage on s'en fous d'ouvrir et de fermer plein de fois la table SQL ça ne réduit pas les performances !
+    En dessous en démarre une connexion pour connaître le nombre de devoirs pour la boucle
+    '''
+    connexion = sqlite3.connect("Gerer_les_devoirs.db")
+    curseur = connexion.cursor()
+    requete = curseur.execute('SELECT * FROM  les_notes')
+
+    #On démarre la boucle pour savoir si on a cliqué sur un logo poubelle
+    for i in requete.fetchall(): #Permet d'avoir le nombre de devoirs (pour la boucle :) )
+        if xMin <= position_souris_x <= xMax and yMin <= position_souris_y <= yMax:
+            fenetre_tkinter = tkinter.Tk()
+
+            bouton_confirmer = tkinter.Button(fenetre_tkinter, text="Confirmer la suppression ?",
+                                              command=confirmer_suppression, height=10, width=20)
+            bouton_annuler = tkinter.Button(fenetre_tkinter, text="Annuler la suppression ?", command=annuler_suppression,
+                                            height=10, width=20)
+
+            bouton_confirmer.pack(side="right")
+            bouton_annuler.pack(side="left")
+
+            fenetre_tkinter.mainloop()
+        yMin += 54
+        yMax += 54
+
+    #On supprimer la connexion à la table SQL
+    connexion.close()
 #Creer la fenêtre
 screen = pygame.display.set_mode((longueur, largeur), pygame.RESIZABLE)
 

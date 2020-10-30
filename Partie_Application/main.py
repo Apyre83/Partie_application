@@ -181,6 +181,7 @@ def supprimer_devoirs():
         yMax += 54
 
 
+
 # Accueil --> aller au menu principal
 
 screen = pygame.display.set_mode((longueur, largeur), pygame.RESIZABLE)
