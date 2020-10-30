@@ -1,4 +1,5 @@
 #coding:utf-8
+
 import tkinter, pygame, sys, sqlite3
 
 #Débuter le programme
@@ -88,7 +89,30 @@ def afficher_devoirs():
     connexion.close()
 
 def ajouter_devoirs(): #Encore ici tu devras changer la fenetre tkinter @Matthieu ^^
-    pass
+
+    #On démarre une connexion à la table comme d'hab
+    connexion = sqlite3.connect('Gerer_les_devoirs.db')
+    curseur = connexion.cursor()
+
+    def ecrire_devoirs(event):       #Ecriture dans la table SQL
+                                                                   #Ici il faudra changer et faire une sorte de menu déroulant parce que pour les devoirs on ajoute que des maths (curseur.lastrowid, "Maths"...)
+        curseur.execute("INSERT INTO les_notes (id_devoirs, Matière, A_Faire) VALUES (?, ?, ?)", (curseur.lastrowid, "Maths", ligne_texte.get()))
+
+        connexion.commit()      #Sauvergarder les modifications
+        afficher_devoirs()          #Actualiser
+        fenetre_tkinter.destroy()   #Quitter tkinter
+        
+    #On créer ici la fenêtre tkinter ce qu'il y a à changer
+    fenetre_tkinter = tkinter.Tk()
+
+    ligne_texte = tkinter.Entry(fenetre_tkinter, width = 30)
+    ligne_texte.pack()
+    fenetre_tkinter.bind('<Return>', ecrire_devoirs)
+
+    fenetre_tkinter.mainloop()
+    connexion.close()
+
+
 
 def supprimer_devoirs():
 
